@@ -398,6 +398,8 @@ MAIN_MENU() {
     script[20]='Список юзер и пасс из mysql'
     script[21]=$(echo -ne "${LMAGENTA}Меню скриптов${DEF}")
     script[22]='Fix sysresccd locale'
+    script[23]='SMART'
+
 
     for index in ${!script[*]}; do
       printf "%4d: %s\n" $index "${script[$index]}"
@@ -519,6 +521,8 @@ do
     22)
       echo "en_US.UTF-8" >> /etc/locale.gen;
       locale-gen;
+      ;;
+    23) wget -q https://raw.githubusercontent.com/tsvetkovivan1993/tools/main/smart.sh && chmod +x smart.sh && ./smart.sh
       ;;
     *)
       echo -ne "${LRED}Unknown choose${DEF}\n" ;;
