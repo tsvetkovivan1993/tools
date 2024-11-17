@@ -16,12 +16,20 @@ def configure_ipmi(ip, netmask, gw):
     os.system(f"ipmitool lan set 1 defgw ipaddr {gw}")
     print("\nНастройки применены. Проверьте подключение к новому IP.")
 
+def currentLAN():
+    print("\nТекущие настройки IPMI на 1 порту")
+    os.system(f"ipmitool lan print 1")
+
+
+
 # Проверка установки IPMITOOL
 ipmitool = os.system("ipmitool chassis selftest")
 if ipmitool != 0:
     print("ipmitool не установлен. Устанавливаем...")
     install_ipmitool()
-
+    
+#Текущие настройки
+currentLAN()
 # Выбор режима настройки
 print("Выберите режим настройки:")
 print("1: По умолчанию с маской /30")
