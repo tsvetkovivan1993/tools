@@ -1,52 +1,68 @@
 #!/usr/bin/python3
 import ipaddress
 import os
-ipmitool=os.system("ipmitool chassis selftest")
 
-if ipmitool == 0:
-    print ("\nipmitool ustanovlen")
-else:
-# Проверка ОС и установка IPMITOOL
-    print ("\nipmitool do not ustanovlen.")
+def install_ipmitool():
+    # Проверка ОС и установка IPMITOOL
     my_os = os.system("apt -v")
     if my_os == 0:
         os.system("apt update && apt install -y ipmitool")
     else:
         os.system("yum -y install ipmitool")
+
+def configure_ipmi(ip, netmask, gw):
+    os.system(f"ipmitool lan set 1 ipaddr {ip}")
+    os.system(f"ipmitool lan set 1 netmask {netmask}")
+    os.system(f"ipmitool lan set 1 defgw ipaddr {gw}")
+    print("\nНастройки применены. Проверьте подключение к новому IP.")
+
+# Проверка установки IPMITOOL
+ipmitool = os.system("ipmitool chassis selftest")
+if ipmitool != 0:
+    print("ipmitool не установлен. Устанавливаем...")
+    install_ipmitool()
+
+# Выбор режима настройки
+print("Выберите режим настройки:")
+print("1: По умолчанию с маской /30")
+print("2: Ввести IP, маску и шлюз вручную")
+choice = input("\nВведите номер режима: ").strip()
+
+if choice == '1':
+    # Режим по умолчанию с маской /30
+    print("\nВведите IP адрес (e.g. 192.168.1.1): ")
+    ipmi_source = input().strip()
+    ipmi_source = str(ipaddress.IPv4Address(ipmi_source))
     
-# Ввод брокаст-айпишника
-print("\ntype /30 (Tolko IP!) IPMI: ")
-ipmi_source=input()
-ipmi_source=ipmi_source.strip()
-ipmi_source=format(ipaddress.IPv4Address(ipmi_source))
+    network = ipaddress.IPv4Network(f"{ipmi_source}/30", strict=False)
+    ipmi_ip = network.network_address + 2
+    ipmi_gw = network.network_address + 1
+    
+    print(f"\nНастраиваем: IP = {ipmi_ip}, Маска = {network.netmask}, Шлюз = {ipmi_gw}")
+    configure_ipmi(str(ipmi_ip), str(network.netmask), str(ipmi_gw))
 
-# считаем айпишник и гейт
-ipmi_ip=ipaddress.IPv4Address(ipmi_source) + 2
-ipmi_gw=ipaddress.IPv4Address(ipmi_source) + 1
+elif choice == '2':
+    # Кастомный режим
+    print("\nВведите IP адрес IPMI: ")
+    custom_ip = input().strip()
+    
+    print("\nВведите маску подсети: ")
+    custom_mask = input().strip()
+    
+    print("\nВведите IP адрес шлюза: ")
+    custom_gw = input().strip()
+    
+    try:
+        # Проверяем корректность формата адресов
+        custom_ip = str(ipaddress.IPv4Address(custom_ip))
+        custom_gw = str(ipaddress.IPv4Address(custom_gw))
+        ipaddress.IPv4Network(f"0.0.0.0/{custom_mask}")  # Проверка маски
+        
+        print(f"\nНастраиваем: IP = {custom_ip}, Маска = {custom_mask}, Шлюз = {custom_gw}")
+        configure_ipmi(custom_ip, custom_mask, custom_gw)
+    
+    except ValueError as e:
+        print(f"Ошибка в формате IP/маски/шлюза: {e}")
 
-# проверяем и прожимаем
-print("\nif vse norm:")
-print ("\nnetwork: " + ipmi_source + "/30")
-print ("\nGW: " + str(ipmi_gw))
-print("\nIP: " + str(ipmi_ip))
-print("\nplease najmi jubya button then here we go")
-input()
-
-os.system("ipmitool lan set 1 ipaddr "+ str(ipmi_ip))
-os.system("ipmitool lan set 1 netmask 255.255.255.252")
-os.system("ipmitool lan set 1 defgw ipaddr "+ str(ipmi_gw ))
-
-# проверяем пинг до нового IP в течение минуты
-
-print ("\nAll nastroyki done.\n Just podojdi odna minuta when it zapinjetsya")
-
-ipmi_ping=os.system("ping -c 1 -w 60 " + str(ipmi_ip))
-
-if ipmi_ping==0:
-    print ("\neverything is done, you prekrasen")
 else:
-    print ("\nshoto-to going wrong, try Cold Reset or what do you hochesh")
-
-# советуем, как прожать новый адрес в DCI
-    
-print("\nty could set new IPMI srazy v DCI, but smeni ID your dedic\n /usr/local/mgr5/sbin/mgrctl -m dcimgr server.connection elid=ID su=admin\n /usr/local/mgr5/sbin/mgrctl -m dcimgr server.connection.edit elid=ID_IPMI ip=" + str(ipmi_ip) + " sok=ok su=admin")
+    print("Некорректный выбор режима.")
