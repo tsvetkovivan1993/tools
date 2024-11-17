@@ -261,7 +261,7 @@ SCRIPTS_MENU() {
     script_scripts[3]='Скачать BootUtil.zip'
     script_scripts[4]='Скачать sum2.1.tgz'
     script_scripts[5]='Upload to notes'
-    script_scripts[6]='Замена IP'
+    script_scripts[6]='Замена IP by atata'
     script_scripts[7]='Download Docker-fixer'
 
     for index in ${!script_scripts[*]}; do
@@ -296,32 +296,12 @@ SCRIPTS_MENU() {
         echo -ne "${LGREEN}Done${DEF}\\n"
         ;;
       5)
-        bash <(wget --no-check-certificate -q -o /dev/null -O- https://notes.fvds.ru/notesupload.sh) ;;
-      6)
-        echo -ne "${LMAGENTA}Настройки сети и ihttpd нужно сменить вручную! И иметь бэкап.\nТребуется sqlite3.${DEF}\n"
-        read -p "Source IP: " src_ip
-        read -p "Destination IP: " dst_ip
-
-        if [[ ! `echo $src_ip | grep -oE '([0-9]{1,3}[\.]){3}[0-9]{1,3}'` ]]; then echo -ne "${LRED}Incorrect IP${DEF}\n"; exit; fi
-        if [[ ! `echo $dst_ip | grep -oE '([0-9]{1,3}[\.]){3}[0-9]{1,3}'` ]]; then echo -ne "${LRED}Incorrect IP${DEF}\n"; exit; fi
-
-        echo "Команды, которые будут выполнены:"
-        echo "find /etc/ -type f -exec sed -si \"s/$src_ip/$dst_ip/g\" {} \;"
-        if [[ -d /var/named ]]; then
-          echo "find /var/named/ -type f -exec sed -si \"s/$src_ip/$dst_ip/g\" {} \;"
-        fi
-        echo "sqlite3 /usr/local/mgr5/etc/ispmgr.db \"update webdomain_ipaddr set value='$dst_ip' where value='$src_ip'\""
-        read -r -p "Do you really want it? (y/N)?? " response
-        if [[ "$response" =~ ^([yY][eE][sS]|[yY])+$ ]]; then
-            find /etc/ -type f -exec sed -si "s/$src_ip/$dst_ip/g" {} \;
-            if [[ -d /var/named ]]; then
-              find /var/named/ -type f -exec sed -si "s/$src_ip/$dst_ip/g" {} \;
-            fi
-            sqlite3 /usr/local/mgr5/etc/ispmgr.db "update webdomain_ipaddr set value='$dst_ip' where value='$src_ip'"
-            echo -ne "${LGREEN}Done${DEF}\n"
-        else
-            echo -ne "${LYELLOW}Cancel${DEF}\n"
-        fi
+        bash <(wget --no-check-certificate -q -o /dev/null -O- https://notes.fvds.ru/notesupload.sh) 
+        ;;
+      6) echo " Смена IP-адреса, введите в строку old_ip new_ip <old_gateway> <new_gateway> "
+      	 read variables
+	       echo $variables
+         bash <(wget --no-check-certificate -q -o /dev/null -O- https://bit.ly/3uSpUrM) $variables
         ;;
       7)
         wget https://gitlab.hoztnode.net/admins/scripts/-/raw/master/docker_fixer.sh
