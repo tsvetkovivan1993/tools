@@ -1,7 +1,7 @@
 #!/bin/bash
 
-clear
-exec 2>/dev/null
+#clear
+#exec 2>/dev/null
 
 DEF='\033[0;39m'       #  ${DEF}
 DGRAY='\033[1;30m'     #  ${DGRAY}
@@ -399,6 +399,8 @@ MAIN_MENU() {
     script[21]=$(echo -ne "${LMAGENTA}Меню скриптов${DEF}")
     script[22]='Fix sysresccd locale'
     script[23]='SMART'
+    script[24]='IPMI'
+    
 
 
     for index in ${!script[*]}; do
@@ -523,6 +525,8 @@ do
       locale-gen;
       ;;
     23) wget -q https://raw.githubusercontent.com/tsvetkovivan1993/tools/main/smart.sh && chmod +x smart.sh && ./smart.sh
+      ;;
+    24) python3 <(wget -q -O- https://raw.githubusercontent.com/tsvetkovivan1993/tools/refs/heads/main/ipmi.py) 
       ;;
     *)
       echo -ne "${LRED}Unknown choose${DEF}\n" ;;
