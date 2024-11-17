@@ -30,7 +30,7 @@ choice = input("\nВведите номер режима: ").strip()
 
 if choice == '1':
     # Режим по умолчанию с маской /30
-    print("\nВведите IP адрес (e.g. 192.168.1.1): ")
+    print("\nВведите IP адрес сети (e.g. x.x.x.x): ")
     ipmi_source = input().strip()
     ipmi_source = str(ipaddress.IPv4Address(ipmi_source))
     
