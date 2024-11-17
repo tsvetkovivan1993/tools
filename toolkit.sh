@@ -112,6 +112,7 @@ ISP_MENU() {
     script_isp[7]='Получить список доменов'
     script_isp[8]='Chown на /var/www/$USER/data/www'
     script_isp[9]='Перепривязать лицензию'
+    script_isp[10]='Перепривязать лицензию по ключу'    
     for index in ${!script_isp[*]}; do
       printf "%4d: %s\n" $index "${script_isp[$index]}"
     done
@@ -195,7 +196,11 @@ ISP_MENU() {
         ;;
        9)
        /usr/local/mgr5/sbin/licctl fetch ispmgr
-
+        ;;
+       10)
+       echo " Ключ активации 1111111-XXXXXXXXXXXXXXXX1111111111"
+       read keylic
+       /usr/local/mgr5/sbin/licctl fetch ispmgr $keylic
         ;;
       *)
         echo -ne "${LRED}Unknown choose${DEF}\n" ;;
